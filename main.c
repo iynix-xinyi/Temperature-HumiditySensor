@@ -16,13 +16,13 @@
 int main(void)
 {
 	_delay_ms(2);
-    lcd_init();
+    	lcd_init();
 	_delay_ms(1);
 	lcd_clear();
 	_delay_ms(2);
-    lcd_write_word("Temp: ");
-    lcd_goto_xy(1,0);
-    lcd_write_word("LCD is working");
+    	lcd_write_word("Temp: ");
+    	lcd_goto_xy(1,0);
+    	lcd_write_word("LCD is working");
 	_delay_ms(1);
 	lcd_send_command(0x0E);
 	_delay_ms(2);
