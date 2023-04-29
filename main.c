@@ -10,7 +10,7 @@
 #endif
 
 #include "LCD.h"
-#include "DHT.h"
+#include "DHT11sensor v1.0.h"
 #include <avr/io.h>
 #include <util/delay.h>
 
@@ -34,33 +34,21 @@ int main(void)
 	_delay_ms(2);
 	lcd_send_command(0x0C);
 	
-	double temperature[1];
-	double humidity[1];
-	
-	
-	DHT_Setup();
-	while (1) {
-		DHT_Read(temperature, humidity);
-		//Read from sensor
-		DHT_Read(temperature, humidity);
-		
-		//Check status
-		switch (DHT_GetStatus())
-		{
-			case (DHT_Ok):
-				changeTemp(temperature);
-				changeHumi(humidity);
-				break;
-			case (DHT_Error_Checksum):
-				printSumError();
-				break;
-			case (DHT_Error_Timeout):
-				printTimeError();
-				break;
+	int8_t DHTreturnCode;
+	while(1) {
+		DHTreturnCode = DHT11ReadData();
+		if (DHTreturnCode == 1) {
+			DHT11DisplayTemperature();
+			DHT11DisplayHumidity();
 		}
-		
-		//Sensor needs 1-2s to stabilize its readings
-		_delay_ms(1000);
+		else {
+			if (DHTreturnCode == -1) {
+				printSumError();
+			}
+			else {
+				printTimeError();
+			}
+		}
 	}
 	
 }
