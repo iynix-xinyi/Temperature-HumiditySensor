@@ -64,10 +64,10 @@ ________________________________________________________________________________
 /*************************************************************
 	DEFINE SETUP
 **************************************************************/
-#define SENSOR_DDR				DDRC
-#define SENSOR_PORT				PORTC
-#define SENSOR_PIN				PINC
-#define SENSOR_PIN_BIT			PC5
+#define SENSOR_DDR				DDRB
+#define SENSOR_PORT				PORTB
+#define SENSOR_PIN				PINB
+#define SENSOR_PIN_BIT			PB0
 #define SAMPLE_DELAY			2000 // DHT11 has a maximum sampling rate of 1 per second
 #define DHT_NR_OF_SAMPLES		8	 // Number of samples used for averaging the values
 #define DHT_TEMP_ERROR_OFFSET	0    // In degrees. If positive, will be added to final result, if negative, will be subtracted
