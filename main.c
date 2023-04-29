@@ -28,23 +28,21 @@ unsigned char tErr[] = "TError";
 int buttonPress = 0;
 
 
-ISR(PCINT8_vect) {
-	buttonPress = 1;
-}
-
 
 int main(void)
 {	
+	lcdSetUp();
 	//DDRD |= 0x01; // Port C LSB is output
 	//PCICR |= 0x04;
 	//PCMSK2 |= 0x04;
 	//EIMSK = 0x01; // Enable INT0
 	//EICRA = 0x01; // INT0 on falling edge
 	//DDRC |= 0x00; //Port C LSB in input?
-	PCICR |= 0x02;						// turn on port C
-	PCMSK1 |= 0x01;
+	PCICR |= 0b00000001; 						// turn on port B
+	PCMSK0 |= 0b00000100;
+	sei();
 	// LCD setup
-	lcdSetUp();
+	
 	
 	// DHT11 setup
 	int8_t DHTreturnCode;
@@ -53,13 +51,11 @@ int main(void)
 		if (DHTreturnCode == 1 && buttonPress == 1) {
 			// need to clear lcd from (0, 6) to (0, 13) here
 			/* add code here to clear */
-			cli();
 			DHT11DisplayTemperature();
 			DHT11DisplayHumidity();
 			buttonPress = 0;
 			//_delay_ms(5000);
 			//printNA();
-			sei();
 		}
 		if (DHTreturnCode == -1) {
 			if (DHTreturnCode == -1) {
@@ -74,7 +70,6 @@ int main(void)
 }
 
 void lcdSetUp(){
-	cli();
 	_delay_ms(2);
 	lcd_init();
 	_delay_ms(1);
@@ -87,7 +82,6 @@ void lcdSetUp(){
 	lcd_send_command(0x0E);
 	_delay_ms(2);
 	lcd_send_command(0x0C);
-	sei();
 }
 
 void printNA(){
@@ -129,5 +123,9 @@ void printTimeError() {
 	lcd_write_word(tErr);
 	_delay_ms(1);
 }
+
+//ISR(PCINT2_vect) {
+	//buttonPress = 1;
+//}
 
 
