@@ -59,7 +59,7 @@ ________________________________________________________________________________
 **************************************************************/
 #include <avr/io.h>
 #include <util/delay.h>
-#include "OnLCDLib v1.3.h"
+#include "LCD.h"
 
 /*************************************************************
 	DEFINE SETUP
@@ -105,15 +105,21 @@ void DHT11Setup(){
 }
 
 void DHT11DisplayTemperature(){
-	LCDWriteInt(DHT11Data[2] + DHT_TEMP_ERROR_OFFSET, 2);
-	LCDData(0b11011111);
-	LCDData('C');
+	lcd_goto_xy(0, 6);
+	char strTemp[3];
+	sprintf(strTemp, "%d", DHT11Data[2] + DHT_TEMP_ERROR_OFFSET);
+	lcd_write_word(strTemp);
+	lcd_goto_xy(0, 8);
+	lcd_write_character('C');
 }
 
 void DHT11DisplayHumidity(){
-	LCDWriteInt(DHT11Data[0], 2);
-	LCDData(' ');
-	LCDData('%');
+	cd_goto_xy(0, 10);
+	char strHum[3];
+	sprintf(strHum, "%d", DHT11Data[0]);
+	lcd_write_word(strHum);
+	lcd_goto_xy(1, 13);
+	lcd_write_character('%');
 }
 
 void DHT11ReadDataAvg(){
