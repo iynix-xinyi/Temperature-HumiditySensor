@@ -11,6 +11,7 @@
 
 #include "LCD.h"
 #include "DHT11sensor v1.0.h"
+#include <avr/interrupt.h>
 #include <avr/io.h>
 #include <util/delay.h>
 
@@ -19,10 +20,29 @@ void changeTemp(double temp[1]);
 void changeHumi(double hum[1]);
 void printSumError();
 void printTimeError();
-void printNA();
+unsigned char Temp[] = "Temp: NA ";
+unsigned char Humidity[] = "Humidity: NA";
+unsigned char sErr[] = "SError";
+unsigned char tErr[] = "TError";
+
+int buttonPress = 0;
+
+
+ISR(PCINT8_vect) {
+	buttonPress = 1;
+}
+
 
 int main(void)
 {	
+	//DDRD |= 0x01; // Port C LSB is output
+	//PCICR |= 0x04;
+	//PCMSK2 |= 0x04;
+	//EIMSK = 0x01; // Enable INT0
+	//EICRA = 0x01; // INT0 on falling edge
+	//DDRC |= 0x00; //Port C LSB in input?
+	PCICR |= 0x02;						// turn on port C
+	PCMSK1 |= 0x01;
 	// LCD setup
 	lcdSetUp();
 	
@@ -30,13 +50,18 @@ int main(void)
 	int8_t DHTreturnCode;
 	while(1) {
 		DHTreturnCode = DHT11ReadData();
-		if (DHTreturnCode == 1) {
+		if (DHTreturnCode == 1 && buttonPress == 1) {
 			// need to clear lcd from (0, 6) to (0, 13) here
 			/* add code here to clear */
+			cli();
 			DHT11DisplayTemperature();
 			DHT11DisplayHumidity();
+			buttonPress = 0;
+			//_delay_ms(5000);
+			//printNA();
+			sei();
 		}
-		else {
+		if (DHTreturnCode == -1) {
 			if (DHTreturnCode == -1) {
 				printSumError();	// print out error starting on (0, 6)
 			}
@@ -49,28 +74,27 @@ int main(void)
 }
 
 void lcdSetUp(){
+	cli();
 	_delay_ms(2);
 	lcd_init();
 	_delay_ms(1);
 	lcd_clear();
 	_delay_ms(2);
-	lcd_write_word("Temp: NA");
+	lcd_write_word(Temp);
 	lcd_goto_xy(1,0);
-	lcd_write_word("Humidity: NA");
+	lcd_write_word(Humidity);
 	_delay_ms(1);
 	lcd_send_command(0x0E);
 	_delay_ms(2);
 	lcd_send_command(0x0C);
+	sei();
 }
 
-void printNA() {
-	lcd_goto_xy(0,0);
+void printNA(){
 	_delay_ms(2);
-	lcd_clear();
-	_delay_ms(2);
-	lcd_write_word("Temp: NA");
+	lcd_write_word(Temp);
 	lcd_goto_xy(1,0);
-	lcd_write_word("Humidity: NA");
+	lcd_write_word(Humidity);
 	_delay_ms(1);
 }
 
@@ -95,13 +119,15 @@ void changeHumi(double hum[1]) {
 void printSumError() {
 	lcd_goto_xy(0, 6);
 	_delay_ms(1);
-	lcd_write_word("SError");
+	lcd_write_word(sErr);
 	_delay_ms(1);
 }
 
 void printTimeError() {
 	lcd_goto_xy(0, 6);
 	_delay_ms(1);
-	lcd_write_word("TError");
+	lcd_write_word(tErr);
 	_delay_ms(1);
 }
+
+
