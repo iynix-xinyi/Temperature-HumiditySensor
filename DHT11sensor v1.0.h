@@ -106,21 +106,23 @@ void DHT11Setup(){
 
 void DHT11DisplayTemperature(){
 	lcd_goto_xy(0, 6);
-	char strTemp[3];
-	sprintf(strTemp, "%d", DHT11Data[2] + DHT_TEMP_ERROR_OFFSET);
+	char strTemp[1];
+	sprintf(strTemp, "%d", DHT11Data[2]+DHT_TEMP_ERROR_OFFSET);
 	lcd_write_word(strTemp);
 	lcd_goto_xy(0, 8);
 	lcd_write_character('C');
+
 }
 
 void DHT11DisplayHumidity(){
-	cd_goto_xy(0, 10);
-	char strHum[3];
+	lcd_goto_xy(1, 10);
+	char strHum[1];
 	sprintf(strHum, "%d", DHT11Data[0]);
 	lcd_write_word(strHum);
-	lcd_goto_xy(1, 13);
+	lcd_goto_xy(1, 12);
 	lcd_write_character('%');
 }
+
 
 void DHT11ReadDataAvg(){
 	uint8_t i;
