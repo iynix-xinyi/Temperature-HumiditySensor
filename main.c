@@ -19,6 +19,7 @@ void changeTemp(double temp[1]);
 void changeHumi(double hum[1]);
 void printSumError();
 void printTimeError();
+void printNA();
 
 int main(void)
 {	
@@ -60,6 +61,17 @@ void lcdSetUp(){
 	lcd_send_command(0x0E);
 	_delay_ms(2);
 	lcd_send_command(0x0C);
+}
+
+void printNA() {
+	lcd_goto_xy(0,0);
+	_delay_ms(2);
+	lcd_clear();
+	_delay_ms(2);
+	lcd_write_word("Temp: NA");
+	lcd_goto_xy(1,0);
+	lcd_write_word("Humidity: NA");
+	_delay_ms(1);
 }
 
 void changeTemp(double temp[1]) {
