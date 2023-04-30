@@ -11,8 +11,8 @@
 
 #include "LCD.h"
 #include "DHT11sensor v1.0.h"
-#include <avr/interrupt.h>
 #include <avr/io.h>
+#include <avr/interrupt.h>
 #include <util/delay.h>
 
 void lcdSetUp();
@@ -20,44 +20,60 @@ void changeTemp(double temp[1]);
 void changeHumi(double hum[1]);
 void printSumError();
 void printTimeError();
-unsigned char Temp[] = "Temp: NA ";
-unsigned char Humidity[] = "Humidity: NA";
-unsigned char sErr[] = "SError";
-unsigned char tErr[] = "TError";
+void printNA();
 
-int buttonPress = 0;
+int buttonFlag = 0;		// off
 
+//ISR(PCINT2_vect){
+	
+//}
+
+
+ISR(INT0_vect) {
+	/*
+	unsigned char temp;
+	temp = PORTB;
+	temp = temp | 0b00000010;
+	PORTB = temp;
+	_delay_ms(1000);
+	temp = PORTB;
+	temp = temp &~(0b00000010);
+	PORTB = temp;
+	*/
+	DHT11DisplayTemperature();
+	DHT11DisplayHumidity();
+	_delay_ms(5000);
+	printNA();
+}
 
 
 int main(void)
 {	
-	lcdSetUp();
-	//DDRD |= 0x01; // Port C LSB is output
-	//PCICR |= 0x04;
-	//PCMSK2 |= 0x04;
-	//EIMSK = 0x01; // Enable INT0
-	//EICRA = 0x01; // INT0 on falling edge
-	//DDRC |= 0x00; //Port C LSB in input?
-	PCICR |= 0b00000001; 						// turn on port B
-	PCMSK0 |= 0b00000100;
-	sei();
+	
+	//PCICR |= 0b00000001;
+	//PCMSK0 |= 0b00000100;
+	
+	//PCICR |= 0b00000100;
+	//PCMSK2 |= 0b00000100;
+	cli();
+	EICRA = EICRA | 0x02; // INT0 if high --> low
+	EIMSK = EIMSK | 1 << INT0; // Enable INT0
+	
 	// LCD setup
-	
-	
+	lcdSetUp();
+	sei();
 	// DHT11 setup
 	int8_t DHTreturnCode;
 	while(1) {
 		DHTreturnCode = DHT11ReadData();
-		if (DHTreturnCode == 1 && buttonPress == 1) {
+		if (DHTreturnCode == 1) {
 			// need to clear lcd from (0, 6) to (0, 13) here
 			/* add code here to clear */
-			DHT11DisplayTemperature();
-			DHT11DisplayHumidity();
-			buttonPress = 0;
-			//_delay_ms(5000);
+			//DHT11DisplayTemperature();
+			//DHT11DisplayHumidity();
 			//printNA();
 		}
-		if (DHTreturnCode == -1) {
+		else {
 			if (DHTreturnCode == -1) {
 				printSumError();	// print out error starting on (0, 6)
 			}
@@ -75,20 +91,23 @@ void lcdSetUp(){
 	_delay_ms(1);
 	lcd_clear();
 	_delay_ms(2);
-	lcd_write_word(Temp);
+	lcd_write_word("Temp: NA");
 	lcd_goto_xy(1,0);
-	lcd_write_word(Humidity);
+	lcd_write_word("Humidity: NA");
 	_delay_ms(1);
 	lcd_send_command(0x0E);
 	_delay_ms(2);
 	lcd_send_command(0x0C);
 }
 
-void printNA(){
+void printNA() {
+	lcd_goto_xy(0,0);
 	_delay_ms(2);
-	lcd_write_word(Temp);
+	lcd_clear();
+	_delay_ms(2);
+	lcd_write_word("Temp: NA");
 	lcd_goto_xy(1,0);
-	lcd_write_word(Humidity);
+	lcd_write_word("Humidity: NA");
 	_delay_ms(1);
 }
 
@@ -113,19 +132,13 @@ void changeHumi(double hum[1]) {
 void printSumError() {
 	lcd_goto_xy(0, 6);
 	_delay_ms(1);
-	lcd_write_word(sErr);
+	lcd_write_word("SError");
 	_delay_ms(1);
 }
 
 void printTimeError() {
 	lcd_goto_xy(0, 6);
 	_delay_ms(1);
-	lcd_write_word(tErr);
+	lcd_write_word("TError");
 	_delay_ms(1);
 }
-
-//ISR(PCINT2_vect) {
-	//buttonPress = 1;
-//}
-
-
