@@ -104,6 +104,17 @@ void DHT11Setup(){
 	DHT11Init = 1;
 }
 
+int DHT11ReadTemp() {
+	char strTemp[2];
+	sprintf(strTemp, "%d", DHT11Data[2]+DHT_TEMP_ERROR_OFFSET);
+	int a = atoi(strTemp);
+	return (a);
+}
+
+int DHT11ReadHum() {
+	return (DHT11Data[0]);
+}
+
 void DHT11DisplayTemperature(){
 	lcd_goto_xy(0, 6);
 	char strTemp[1];
