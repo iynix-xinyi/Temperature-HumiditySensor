@@ -40,10 +40,11 @@ ISR(INT0_vect) {
 	temp = temp &~(0b00000010);
 	PORTB = temp;
 	*/
-	DHT11DisplayTemperature();
+	/*DHT11DisplayTemperature();
 	DHT11DisplayHumidity();
 	_delay_ms(5000);
-	printNA();
+	printNA();*/
+	switchPressed();
 }
 
 
@@ -66,11 +67,32 @@ int main(void)
 	int8_t DHTreturnCode;
 	while(1) {
 		DHTreturnCode = DHT11ReadData();
-		if (DHTreturnCode == 1) {
-			// need to clear lcd from (0, 6) to (0, 13) here
-			/* add code here to clear */
-			//DHT11DisplayTemperature();
-			//DHT11DisplayHumidity();
+		if (buttonFlag == 1) {
+			if (DHTreturnCode == 1) {
+				// need to clear lcd from (0, 6) to (0, 13) here
+				/* add code here to clear */
+				cli();
+				DHT11DisplayTemperature();
+				DHT11DisplayHumidity();
+				sei();
+				//printNA();
+			}
+			else {
+				if (DHTreturnCode == -1) {
+					printSumError();	// print out error starting on (0, 6)
+				}
+				else {
+					printTimeError();	// print out error starting on (0, 6)
+				}
+			}
+		}
+
+		/*
+		if (DHTreturnCode == 1 && buttonFlag == 1) {
+			cli();
+			DHT11DisplayTemperature();
+			DHT11DisplayHumidity();
+			sei();
 			//printNA();
 		}
 		else {
@@ -80,7 +102,7 @@ int main(void)
 			else {
 				printTimeError();	// print out error starting on (0, 6)
 			}
-		}
+		}*/
 	}
 	
 }
@@ -141,4 +163,16 @@ void printTimeError() {
 	_delay_ms(1);
 	lcd_write_word("TError");
 	_delay_ms(1);
+}
+
+void switchPressed() {
+	if (buttonFlag == 0) {
+		buttonFlag = 1;
+		return;
+	}
+	else {
+		buttonFlag = 0;
+		printNA();
+	}
+	
 }
