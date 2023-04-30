@@ -15,6 +15,7 @@
 #include <avr/interrupt.h>
 #include <util/delay.h>
 
+void switchPressed();
 void lcdSetUp();
 void changeTemp(double temp[1]);
 void changeHumi(double hum[1]);
@@ -22,7 +23,9 @@ void printSumError();
 void printTimeError();
 void printNA();
 
-int buttonFlag = 0;		// off
+volatile int buttonFlag = 0;		// off
+volatile float lowTemp = 100;
+volatile float highTemp = 0;
 
 //ISR(PCINT2_vect){
 	
@@ -69,11 +72,18 @@ int main(void)
 		DHTreturnCode = DHT11ReadData();
 		if (buttonFlag == 1) {
 			if (DHTreturnCode == 1) {
-				// need to clear lcd from (0, 6) to (0, 13) here
-				/* add code here to clear */
 				cli();
 				DHT11DisplayTemperature();
 				DHT11DisplayHumidity();
+				int temperature = DHT11ReadTemp();
+				if (temperature > highTemp) {
+					highTemp = temperature;
+				}
+				if (temperature < lowTemp) {
+					lowTemp = temperature;
+					
+				}
+				printLow();
 				sei();
 				//printNA();
 			}
@@ -86,6 +96,7 @@ int main(void)
 				}
 			}
 		}
+
 
 		/*
 		if (DHTreturnCode == 1 && buttonFlag == 1) {
@@ -173,6 +184,14 @@ void switchPressed() {
 	else {
 		buttonFlag = 0;
 		printNA();
-	}
-	
+	}	
+}
+
+void printLow() {
+	lcd_goto_xy(0, 9);
+	char strLowTemp[2];
+	sprintf(strLowTemp, "%d", lowTemp);
+	char low[] = "Low:";
+	strcat(low, strLowTemp);
+	lcd_write_word(low);
 }
