@@ -88,6 +88,8 @@ int8_t DHT11ReadData(void);
 **************************************************************/
 uint8_t DHT11Data[5] = {0};
 static uint8_t DHT11Init = 0;
+uint8_t lowTemp = 100;
+char strLow[2];
 
 
 /*************************************************************
@@ -104,11 +106,18 @@ void DHT11Setup(){
 	DHT11Init = 1;
 }
 
-int DHT11ReadTemp() {
-	char strTemp[2];
-	sprintf(strTemp, "%d", DHT11Data[2]+DHT_TEMP_ERROR_OFFSET);
-	int a = atoi(strTemp);
-	return (a);
+void DHT11ReadLowTemp() {
+	if (DHT11Data[2] < lowTemp){
+		sprintf(strLow, "%d", DHT11Data[2]+DHT_TEMP_ERROR_OFFSET);
+		int a = atoi(strLow);
+		lowTemp = a;
+	}
+	lcd_goto_xy(0,9);
+	lcd_write_word("Low:");	
+	lcd_goto_xy(0,13);
+	lcd_write_word(strLow);
+	lcd_goto_xy(0,15);
+	lcd_write_character('C');
 }
 
 int DHT11ReadHum() {
@@ -116,22 +125,37 @@ int DHT11ReadHum() {
 }
 
 void DHT11DisplayTemperature(){
-	lcd_goto_xy(0, 6);
+	lcd_goto_xy(0,0);
+	_delay_ms(2);
+	lcd_clear();
+	_delay_ms(2);
+	lcd_write_word("Temp:NA");
+	lcd_goto_xy(0, 5);
 	char strTemp[1];
 	sprintf(strTemp, "%d", DHT11Data[2]+DHT_TEMP_ERROR_OFFSET);
 	lcd_write_word(strTemp);
-	lcd_goto_xy(0, 8);
+	lcd_goto_xy(0, 7);
 	lcd_write_character('C');
-
+	DHT11ReadLowTemp();
+	
 }
 
 void DHT11DisplayHumidity(){
-	lcd_goto_xy(1, 10);
+	lcd_goto_xy(1,0);
+	lcd_write_word("Humidity:NA");
+	_delay_ms(1);
+	lcd_goto_xy(1, 9);
 	char strHum[1];
 	sprintf(strHum, "%d", DHT11Data[0]);
 	lcd_write_word(strHum);
-	lcd_goto_xy(1, 12);
+	lcd_goto_xy(1, 11);
 	lcd_write_character('%');
+}
+
+void clearLow(){
+	lowTemp = 100;
+	strLow[0] = "\0";
+	strLow[1] = "\0";
 }
 
 
