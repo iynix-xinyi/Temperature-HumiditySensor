@@ -88,7 +88,8 @@ int8_t DHT11ReadData(void);
 **************************************************************/
 uint8_t DHT11Data[5] = {0};
 static uint8_t DHT11Init = 0;
-uint8_t lowTemp = 100;
+uint8_t lowTemp = 100;				// Stores the lowest temperature so far
+uint8_t currentTemp;				// Stores the current temperature
 char strLow[2];
 
 
@@ -106,6 +107,7 @@ void DHT11Setup(){
 	DHT11Init = 1;
 }
 
+/* Update the lowest temperature, and print them on LCD */ 
 void DHT11ReadLowTemp() {
 	if (DHT11Data[2] < lowTemp){
 		sprintf(strLow, "%d", DHT11Data[2]+DHT_TEMP_ERROR_OFFSET);
@@ -120,10 +122,7 @@ void DHT11ReadLowTemp() {
 	lcd_write_character('C');
 }
 
-int DHT11ReadHum() {
-	return (DHT11Data[0]);
-}
-
+/* Display temperature, stores the current temperature */ 
 void DHT11DisplayTemperature(){
 	lcd_goto_xy(0,0);
 	_delay_ms(2);
@@ -132,14 +131,16 @@ void DHT11DisplayTemperature(){
 	lcd_write_word("Temp:NA");
 	lcd_goto_xy(0, 5);
 	char strTemp[1];
+	currentTemp = DHT11Data[2] + DHT_TEMP_ERROR_OFFSET;			// stores the current temperature
 	sprintf(strTemp, "%d", DHT11Data[2]+DHT_TEMP_ERROR_OFFSET);
 	lcd_write_word(strTemp);
 	lcd_goto_xy(0, 7);
 	lcd_write_character('C');
-	DHT11ReadLowTemp();
+	DHT11ReadLowTemp();											// store the lowest temperature
 	
 }
 
+/* Display Humidity */ 
 void DHT11DisplayHumidity(){
 	lcd_goto_xy(1,0);
 	lcd_write_word("Humidity:NA");
@@ -152,6 +153,7 @@ void DHT11DisplayHumidity(){
 	lcd_write_character('%');
 }
 
+/* Clear the lowest temperature */
 void clearLow(){
 	lowTemp = 100;
 	strLow[0] = "\0";
