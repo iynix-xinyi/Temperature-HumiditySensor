@@ -24,29 +24,9 @@ void printTimeError();
 void printNA();
 
 volatile int buttonFlag = 0;		// off
-volatile float lowTemp = 100;
-volatile float highTemp = 0;
-
-//ISR(PCINT2_vect){
-	
-//}
 
 
 ISR(INT0_vect) {
-	/*
-	unsigned char temp;
-	temp = PORTB;
-	temp = temp | 0b00000010;
-	PORTB = temp;
-	_delay_ms(1000);
-	temp = PORTB;
-	temp = temp &~(0b00000010);
-	PORTB = temp;
-	*/
-	/*DHT11DisplayTemperature();
-	DHT11DisplayHumidity();
-	_delay_ms(5000);
-	printNA();*/
 	switchPressed();
 }
 
@@ -75,17 +55,7 @@ int main(void)
 				cli();
 				DHT11DisplayTemperature();
 				DHT11DisplayHumidity();
-				int temperature = DHT11ReadTemp();
-				if (temperature > highTemp) {
-					highTemp = temperature;
-				}
-				if (temperature < lowTemp) {
-					lowTemp = temperature;
-					
-				}
-				printLow();
 				sei();
-				//printNA();
 			}
 			else {
 				if (DHTreturnCode == -1) {
@@ -96,24 +66,6 @@ int main(void)
 				}
 			}
 		}
-
-
-		/*
-		if (DHTreturnCode == 1 && buttonFlag == 1) {
-			cli();
-			DHT11DisplayTemperature();
-			DHT11DisplayHumidity();
-			sei();
-			//printNA();
-		}
-		else {
-			if (DHTreturnCode == -1) {
-				printSumError();	// print out error starting on (0, 6)
-			}
-			else {
-				printTimeError();	// print out error starting on (0, 6)
-			}
-		}*/
 	}
 	
 }
@@ -124,9 +76,9 @@ void lcdSetUp(){
 	_delay_ms(1);
 	lcd_clear();
 	_delay_ms(2);
-	lcd_write_word("Temp: NA");
+	lcd_write_word("Temp:NA");
 	lcd_goto_xy(1,0);
-	lcd_write_word("Humidity: NA");
+	lcd_write_word("Humidity:NA");
 	_delay_ms(1);
 	lcd_send_command(0x0E);
 	_delay_ms(2);
@@ -138,27 +90,9 @@ void printNA() {
 	_delay_ms(2);
 	lcd_clear();
 	_delay_ms(2);
-	lcd_write_word("Temp: NA");
+	lcd_write_word("Temp:NA");
 	lcd_goto_xy(1,0);
-	lcd_write_word("Humidity: NA");
-	_delay_ms(1);
-}
-
-void changeTemp(double temp[1]) {
-	lcd_goto_xy(0, 6);
-	_delay_ms(1);
-	char strTemp[3];
-	sprintf(strTemp, "%f", temp[0]);
-	lcd_write_word(strTemp);
-	_delay_ms(1);
-}
-
-void changeHumi(double hum[1]) {
-	lcd_goto_xy(1, 10);
-	_delay_ms(1);
-	char strHum[2];
-	sprintf(strHum, "%f", hum[0]);
-	lcd_write_word(strHum);
+	lcd_write_word("Humidity:NA");
 	_delay_ms(1);
 }
 
@@ -183,15 +117,8 @@ void switchPressed() {
 	}
 	else {
 		buttonFlag = 0;
-		printNA();
+		clearLow();
+		lcd_clear();
 	}	
 }
 
-void printLow() {
-	lcd_goto_xy(0, 9);
-	char strLowTemp[2];
-	sprintf(strLowTemp, "%d", lowTemp);
-	char low[] = "Low:";
-	strcat(low, strLowTemp);
-	lcd_write_word(low);
-}
